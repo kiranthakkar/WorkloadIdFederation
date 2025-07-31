@@ -1,1 +1,10 @@
 /private_key.pem
+/upstToken
+/setupConfig.ini
+/runtimeConfig.ini
+/terraform/terraform.tfstate
+/terraform/.terraform/
+/terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/.terraform/
+terraform/.terraform.lock.hcl

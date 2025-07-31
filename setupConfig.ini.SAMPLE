@@ -1,6 +1,6 @@
 [IdentityDomain]
 # Enter your IAM GUID here
-IAM_GUID=https://idcs-c124f391ebad4514b859eeab5e3d7b08.identity.oraclecloud.com
+IAM_GUID=<your-iam-guid-here>
 
 [OCIConfig]
 CLI_PROFILE=DEFAULT

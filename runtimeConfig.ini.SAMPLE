@@ -1,0 +1,10 @@
+[IdentityDomain]
+iam_guid = <your-iam-guid-here>
+
+[WIFConfig]
+# Replace with your OAuth client ID
+oauthclientid = <your-Token-Exchange-oauth-client-id-here>
+# Replace with your OAuth client secret
+oauthclientsecret = <your-Token-Exchange-oauth-client-secret-here>
+# Replace with your subject token
+subjecttoken = <your-subject-token-here>

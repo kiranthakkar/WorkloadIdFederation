@@ -30,7 +30,7 @@ def tokenExchange(IAM_DOMAIN, OAuthClientID, OAuthClientSecret, SubjectToken):
     public_key_b64 = urllib.parse.quote(public_key_b64, safe='')
     print(f"Public Key: {public_key_b64}")
     
-        # Write private key to a file
+    # Write private key to a file
     with open('private_key.pem', 'wb') as f:
         f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -44,7 +44,9 @@ def tokenExchange(IAM_DOMAIN, OAuthClientID, OAuthClientSecret, SubjectToken):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': authHeader
     }
-
+    print(f"Payload is: {payload}")
+    print(f"Headers are: {headers}")
+    # Make the POST request to exchange the token
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code != 200:
         print(f"Error: {response.status_code} - {response.text}")
@@ -65,14 +67,17 @@ except configparser.Error as e:
     exit()
         
 try:
-    OAuthClientID = config.get('WIFConfig', 'OAuthClientID')
-    OAuthClientSecret = config.get('WIFConfig', 'OAuthClientSecret')
-    SubjectToken = config.get('WIFConfig', 'SubjectToken')
-    IAM_GUID = config.get('IdentityDomain', 'IAM_GUID')
+    OAuthClientID = config.get('WIFConfig', 'oauthclientid')
+    OAuthClientSecret = config.get('WIFConfig', 'oauthclientsecret')
+    SubjectToken = config.get('WIFConfig', 'subjecttoken')
+    IAM_GUID = config.get('IdentityDomain', 'iam_guid')
     print(f"IAM Domain GUID is: {IAM_GUID}")
 except KeyError as e:
     print(f"Missing key in config file: {e}")
 except ValueError as e:
     print(f"Invalid value type in config file: {e}")
 upstToken = tokenExchange(IAM_GUID, OAuthClientID, OAuthClientSecret, SubjectToken)
+with open('upstToken', 'w') as f:
+    f.write(upstToken)
+print("UPST Token written to upstToken")
 print(f"UPST Token: {upstToken}")
