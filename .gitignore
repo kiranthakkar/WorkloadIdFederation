@@ -8,3 +8,6 @@
 terraform/terraform.tfstate
 terraform/.terraform/
 terraform/.terraform.lock.hcl
+setupConfig.ini
+runtimeConfig.ini
+upstToken
