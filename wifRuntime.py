@@ -13,6 +13,26 @@ def generate_basic_auth_header(clientid,clientsecret):
     return f"Basic {encoded_credentials}"
 
 def tokenExchange(IAM_DOMAIN, OAuthClientID, OAuthClientSecret, SubjectToken):
+    """
+    Exchanges a subject token for an OCI upst token using OAuth 2.0 Token Exchange.
+    This function generates a new RSA key pair, encodes the public key, and sends a token exchange request
+    to the specified IAM domain. The private key is saved to 'private_key.pem' in PEM format. The function
+    returns the exchanged token if successful.
+    Args:
+        IAM_DOMAIN (str): The base URL of the IAM domain (e.g., "https://idcs.example.com").
+        OAuthClientID (str): The OAuth 2.0 client ID for authentication.
+        OAuthClientSecret (str): The OAuth 2.0 client secret for authentication.
+        SubjectToken (str): The JWT subject token to be exchanged.
+    Returns:
+        str or None: The exchanged OCI upst token if successful, otherwise None.
+    Notes:
+        - The function generates a new RSA key pair on each call and overwrites 'private_key.pem'.
+        - The public key is base64-encoded and URL-encoded before being sent in the request.
+        - The function expects the response JSON to contain a 'token' field.
+        - The function prints debug information, including the public key, payload, and headers.
+        - If the response status code is not 200 or the 'token' field is missing, None is returned.
+        - The function depends on external functions and modules such as `generate_basic_auth_header`, `rsa`, `serialization`, `default_backend`, `base64`, `urllib`, `requests`, and `json`.
+    """
     url = f"{IAM_DOMAIN}/oauth2/v1/token"
     
     # Generate RSA key pair and public key

@@ -1,17 +1,18 @@
 [IdentityDomain]
 # Enter your IAM GUID here
-IAM_GUID=<your-iam-guid-here>
+iam_guid=<your-iam-guid-here>
 
 [OCIConfig]
-CLI_PROFILE=DEFAULT
+cli_profile=DEFAULT
 
 [WIFConfig]
-ADMIN_APP_NAME=AdminClient
-TOKEN_EXCHANGE_APP_NAME=TokenExchangeClient
+admin_app_name=AdminClient
+token_Exchange_app_name=TokenExchangeClient
 
 [ServiceUserConfig]
-USER_NAME=ServiceUser
+user_name=ServiceUser
+
 [TrustConfiguration]
-ISSUER=<your-oauth-issuer-url>         ; e.g., https://example.com/oauth2/v1/token
-JWK_URI=<your-jwk-uri>                 ; e.g., https://example.com/oauth2/v1/keys
-IMPERSONATIONRULE=<your-rule>          ; e.g., allow:all or specify rule
+issuer=<your-oauth-issuer-url>         ; e.g., https://example.com/oauth2/v1/token
+jwk_uri=<your-jwk-uri>                 ; e.g., https://example.com/oauth2/v1/keys
+impersonationrule=<your-rule>          ; e.g., allow:all or specify rule

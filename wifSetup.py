@@ -56,6 +56,31 @@ def activateOAuthClient(identity_domains_client, clientApp):
     )
 
 def createOAuthClient(identity_domains_client, app_name):
+    """
+    Creates and configures a confidential OAuth client application in Oracle Cloud Infrastructure (OCI) Identity Domains.
+
+    This function performs the following steps:
+    1. Creates a new confidential application using the provided identity domains client and application name.
+    2. Applies a series of patch operations to configure the application as an OAuth client with the "client_credentials" grant type and "confidential" client type.
+    3. Retrieves the client ID and client secret from the patched application.
+    4. Activates the OAuth client application.
+
+    Args:
+        identity_domains_client: An instance of the OCI Identity Domains client, authenticated and authorized to manage applications.
+        app_name (str): The display name for the new OAuth client application.
+
+    Returns:
+        OAuthClient: An object containing the application's ID, OCID, client ID, and client secret.
+
+    Raises:
+        SystemExit: Exits the program if any step fails (e.g., insufficient privileges, API errors, or missing response data).
+
+    Notes:
+        - The caller must ensure that the principal used by `identity_domains_client` has "Application Administrator" privileges in the OCI IAM domain.
+        - The function prints error messages and exits the program on failure, rather than raising exceptions.
+        - The function assumes the existence of an `OAuthClient` class and an `activateOAuthClient` function.
+        - The function is tailored for OCI Identity Domains and may not be portable to other identity providers.
+    """
     try:
         # Define confidential application details
         create_app_response = identity_domains_client.create_app(
@@ -130,7 +155,8 @@ def createOAuthClient(identity_domains_client, app_name):
         exit()
     return clientApp
 
-def grantAdminRole(identity_domains_client,clientApp):
+def grantAdminRole(identity_domains_client,clientApp): 
+    #This function grants Admin role to the OAuth client app. 
     try:
         list_app_roles_response = identity_domains_client.list_app_roles(
             filter='displayName eq "Identity Domain Administrator"'
@@ -202,6 +228,7 @@ def generateAdminOauthToken(adminOauthClient, iamDomain):
         exit()
     
 def createServiceUser(username, AdminOauthToken, iamDomain):
+    # This function creates a service user in the Identity Domain.
     url = f"{iamDomain}/admin/v1/Users"
     authHeader = f"Bearer {AdminOauthToken}"
     payload = json.dumps({
@@ -237,6 +264,31 @@ def createServiceUser(username, AdminOauthToken, iamDomain):
         exit()
 
 def createIdentityPropagationTrust(AdminOauthToken, TrustedClientID, serviceUserOCID, issuer, jwkEndpoint, ImpersonationRule, iamDomain):
+    """
+    Creates an Identity Propagation Trust in Oracle Identity Cloud Service (IDCS) using the provided parameters.
+
+    Args:
+        AdminOauthToken (str): OAuth token with administrative privileges for authentication.
+        TrustedClientID (str): The client ID of the trusted OAuth client.
+        serviceUserOCID (str): OCID (Oracle Cloud Identifier) of the service user to be impersonated.
+        issuer (str): The issuer URL for the JWT tokens.
+        jwkEndpoint (str): The endpoint URL for the JSON Web Key Set (JWKS).
+        ImpersonationRule (str): Rule defining the conditions for impersonation.
+        iamDomain (str): The base URL of the IDCS domain.
+
+    Returns:
+        str: The ID of the created Identity Propagation Trust.
+
+    Raises:
+        SystemExit: If the HTTP request fails, the response cannot be parsed as JSON, or the response does not contain an ID.
+
+    Notes:
+        - This function sends a POST request to the IDCS IdentityPropagationTrusts endpoint.
+        - The function prints the response and errors to the console.
+        - The function will terminate the program using exit() if an error occurs.
+        - The function expects the 'requests' and 'json' modules to be imported.
+    """
+    # This function create Identity Propagation Trust
     url = f"{iamDomain}/admin/v1/IdentityPropagationTrusts"
     authHeader = f"Bearer {AdminOauthToken}"
     payload = json.dumps({
@@ -285,6 +337,26 @@ def createIdentityPropagationTrust(AdminOauthToken, TrustedClientID, serviceUser
         exit()
     
 def wifConfiguration():        
+    """
+    Configures Workload Identity Federation (WIF) by reading configuration files, setting up OCI clients, 
+    creating OAuth clients, updating runtime configuration, and establishing trust relationships.
+    Steps performed:
+    1. Reads configuration from 'setupConfig.ini' for required parameters.
+    2. Extracts IAM domain GUID, OCI CLI profile, application names, service user, and trust configuration.
+    3. Initializes OCI configuration and Identity Domains client.
+    4. Creates an Admin OAuth client and grants it admin role.
+    5. Generates an OAuth token for the Admin client.
+    6. Creates a Token Exchange OAuth client.
+    7. Updates 'runtimeConfig.ini' with OAuth client credentials.
+    8. Creates a service user and establishes identity propagation trust.
+    Notes:
+    - Requires 'setupConfig.ini' and 'runtimeConfig.ini' files to be present and properly formatted.
+    - Assumes OCI CLI configuration is available at '~/.oci/config'.
+    - Relies on external functions: createOAuthClient, grantAdminRole, generateAdminOauthToken, 
+      createServiceUser, and createIdentityPropagationTrust.
+    - Handles missing configuration keys and configparser errors gracefully.
+    - Prints key configuration values for verification.
+    """
     
     config=configparser.ConfigParser()
     try:
@@ -294,14 +366,14 @@ def wifConfiguration():
         exit()
         
     try:
-        IAM_GUID = config['IdentityDomain']['IAM_GUID']
-        CLI_PROFILE = config['OCIConfig']['CLI_PROFILE']
-        ADMIN_APP_NAME=config['WIFConfig']['ADMIN_APP_NAME']
-        TOKEN_EXCHANGE_APP_NAME=config['WIFConfig']['TOKEN_EXCHANGE_APP_NAME']
-        SERVICE_USER=config['ServiceUserConfig']['USER_NAME']
-        ISSUER=config['TrustConfiguration']['ISSUER']
-        JWK_URI=config['TrustConfiguration']['JWK_URI']
-        IMPERSONATIONRULE=config['TrustConfiguration']['IMPERSONATIONRULE']
+        IAM_GUID = config['IdentityDomain']['iam_guid']
+        CLI_PROFILE = config['OCIConfig']['cli_profile']
+        ADMIN_APP_NAME=config['WIFConfig']['admin_app_name']
+        TOKEN_EXCHANGE_APP_NAME=config['WIFConfig']['token_exchange_app_name']
+        SERVICE_USER=config['ServiceUserConfig']['user_name']
+        ISSUER=config['TrustConfiguration']['issuer']
+        JWK_URI=config['TrustConfiguration']['jwk_uri']
+        IMPERSONATIONRULE=config['TrustConfiguration']['impersonationrule']
         print(f"IAM Domain GUID is: {IAM_GUID}")
         print(f"OCI CLI Profile to be used is: {CLI_PROFILE}")
     except KeyError as e:
